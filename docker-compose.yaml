@@ -20,9 +20,7 @@ services:
           memory: "30MB"
 
   app1:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: nathanfabio/rinha2025-golang:v1
     depends_on:
       - redis
     environment:
@@ -39,13 +37,9 @@ services:
         limits:
           cpus: "0.50"
           memory: "70MB"
-
-
 
   app2:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: nathanfabio/rinha2025-golang:v1
     depends_on:
       - redis
     environment:
@@ -62,7 +56,6 @@ services:
         limits:
           cpus: "0.50"
           memory: "70MB"
-
 
   redis:
     image: redis:7-alpine
@@ -74,7 +67,6 @@ services:
         limits:
           cpus: "0.20"
           memory: "180MB"
-
 
 networks:
   backend:
