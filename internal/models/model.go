@@ -36,3 +36,7 @@ type ProcessorType struct {
 	PaymentProcessorRequest
 	UseFallback bool `json:"useFallback"`
 }
+
+// type Payment struct {
+// 	Request Payme
+// }
