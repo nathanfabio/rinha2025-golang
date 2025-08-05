@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/nathanfabio/rinha2025-golang/internal/models"
@@ -72,7 +71,6 @@ func (r *RedisRepository) GetPaymentRedis(ctx context.Context, from, to time.Tim
 	for _, result := range results {
 		var payment models.ProcessorType
 		if err := json.Unmarshal([]byte(result), &payment); err != nil {
-			log.Printf("ERROR: error to deserialise payment: %v", err)
 			continue
 		}
 		payments = append(payments, payment)
