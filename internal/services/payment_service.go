@@ -14,17 +14,20 @@ import (
 )
 
 type PaymentService interface {
+	ProcessPayment(payment models.PaymentProcessorRequest) bool 
 }
 
 type paymentService struct {
 	repo repository.PaymentRepository
 	cfg *config.Config
+	healthService HealthService
 }
 
-func NewPaymentService(repo repository.PaymentRepository, cfg *config.Config) PaymentService {
+func NewPaymentService(repo repository.PaymentRepository, cfg *config.Config, healthService HealthService) PaymentService {
 	return &paymentService{
 		repo: repo,
 		cfg: cfg,
+		healthService: healthService,
 	}
 }
 
@@ -39,11 +42,13 @@ func (s *paymentService) ProcessPayment(payment models.PaymentProcessorRequest) 
 		Timeout: 10*time.Second,
 	}
 	
-	if s.tryProcessor(client, s.cfg.DefaultProcessorURL, jsonData, payment, false) {
+	if s.healthService.GetTimeout("default") == 0 {
+		s.tryProcessor(client, s.cfg.DefaultProcessorURL, jsonData, payment, false) 
 		return true
 	}
-
-	if s.tryProcessor(client, s.cfg.FallbackProcessorURL, jsonData, payment, true) {
+	
+	if s.healthService.GetTimeout("fallback") == 0 {
+		s.tryProcessor(client, s.cfg.FallbackProcessorURL, jsonData, payment, true)
 		return true
 	}
 
