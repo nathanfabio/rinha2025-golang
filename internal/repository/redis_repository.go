@@ -12,6 +12,8 @@ import (
 )
 
 type PaymentRepository interface {
+	StorePayment(ctx context.Context, payment models.PaymentProcessorRequest, useFallback bool) error
+	GetPaymentRedis(ctx context.Context, from, to time.Time) ([]models.ProcessorType, error)
 }
 
 type RedisRepository struct {
