@@ -31,3 +31,8 @@ type PaymentServiceHealth struct {
 	Failing         bool `json:"failing"`
 	MinResponseTime int  `json:"minResponseTime"`
 }
+
+type ProcessorType struct {
+	PaymentProcessorRequest
+	UseFallback bool `json:"useFallback"`
+}
