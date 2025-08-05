@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"math"
 	"net/http"
 	"time"
 
@@ -15,6 +16,7 @@ import (
 
 type PaymentService interface {
 	ProcessPayment(payment models.PaymentProcessorRequest) bool 
+	GetPaymentsSummary(ctx context.Context, from, to time.Time) (*models.PaymentsSummaryResponse, error)
 }
 
 type paymentService struct {
@@ -71,4 +73,40 @@ func (s *paymentService) tryProcessor(client *http.Client, processorURL string, 
 	}
 
 	return false
+}
+
+func (s *paymentService) GetPaymentsSummary(ctx context.Context, from, to time.Time) (*models.PaymentsSummaryResponse, error) {
+	payments, err := s.repo.GetPaymentRedis(ctx, from, to)
+	if err != nil {
+		return nil, err
+	}
+
+
+	var (
+		countDefault int
+		countFallback int
+		totalDefault float64
+		totalfallback float64
+	)
+
+	for _, payment := range payments {
+		if payment.UseFallback {
+			countFallback++
+			totalfallback += payment.Amount
+		} else {
+			countDefault++
+			totalDefault += payment.Amount
+		}
+	}
+
+	return &models.PaymentsSummaryResponse{
+		Default: models.PaymentSummary{
+			TotalRequests: countDefault,
+			TotalAmount: math.Round(totalDefault*100) / 100,
+		},
+		Fallback: models.PaymentSummary{
+			TotalRequests: countFallback,
+			TotalAmount: math.Round(totalfallback*100) / 100,
+		},
+	}, nil
 }
