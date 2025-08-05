@@ -12,7 +12,7 @@ import (
 )
 
 type HealthService interface {
-	CheckProcessorHealth(processorURL string)
+	CheckProcessorHealth()
 	GetTimeout(processor string) int 
 }
 
@@ -31,13 +31,13 @@ func NewHealthService(cfg *config.Config) HealthService {
 	return &healthService{
 		cfg: cfg,
 		status: map[string]*processorStatus{
-			"default":  &processorStatus{},
+			"default": &processorStatus{},
 			"fallback": &processorStatus{},
 		},
 	}
 }
 
-func (h *healthService) CheckProcessorHealth(processorURL string) {
+func (h *healthService) CheckProcessorHealth() {
 	h.healthCheckMutex.Lock()
 	defer h.healthCheckMutex.Unlock()
 

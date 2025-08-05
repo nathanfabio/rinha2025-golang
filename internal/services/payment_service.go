@@ -43,14 +43,18 @@ func (s *paymentService) ProcessPayment(payment models.PaymentProcessorRequest) 
 	client := &http.Client{
 		Timeout: 10*time.Second,
 	}
+
+	s.healthService.CheckProcessorHealth()
 	
 	if s.healthService.GetTimeout("default") == 0 {
 		s.tryProcessor(client, s.cfg.DefaultProcessorURL, jsonData, payment, false) 
+		log.Printf("INFO: payment processed with DEFAULT processor")
 		return true
 	}
 	
 	if s.healthService.GetTimeout("fallback") == 0 {
 		s.tryProcessor(client, s.cfg.FallbackProcessorURL, jsonData, payment, true)
+		log.Printf("INFO: payment processed with FALLBACK processor")
 		return true
 	}
 
@@ -58,10 +62,11 @@ func (s *paymentService) ProcessPayment(payment models.PaymentProcessorRequest) 
 } 
 
 func (s *paymentService) tryProcessor(client *http.Client, processorURL string, jsonData []byte, payload models.PaymentProcessorRequest, useFallback bool) bool {
-	resp, err := client.Post(processorURL+"/payments", "aplication/json", bytes.NewBuffer(jsonData))
+	resp, err := client.Post(processorURL+"/payments", "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return false
 	}
+	log.Printf("INFO: status code: %d", resp.StatusCode)
 
 	defer resp.Body.Close()
 
