@@ -51,20 +51,30 @@ func (h *PaymentHandler) GetPaymentsSummary(w http.ResponseWriter, r *http.Reque
 	fromStr := r.URL.Query().Get("from")
 	toStr := r.URL.Query().Get("to")
 
-	// if fromStr == "" || toStr == "" {
-		
-	// }
-
-	from, err := time.Parse("2006-01-02T15:04:05.000Z", fromStr)
-	if err != nil {
-		http.Error(w, "'from' parameter invalid", http.StatusBadRequest)
-		return
+	var (
+		from time.Time
+		to time.Time
+		err error
+	)
+	
+	if fromStr == "" {
+		from = time.Time{}
+	} else {
+		from, err = time.Parse("2006-01-02T15:04:05.000Z", fromStr)
+		if err != nil {
+			http.Error(w, "'from' parameter invalid", http.StatusBadRequest)
+			return
+		}
 	}
 
-	to, err := time.Parse("2006-01-02T15:04:05.000Z", toStr)
-	if err != nil {
-		http.Error(w, "'to' parameter invalid", http.StatusBadRequest)
-		return
+	if toStr == "" {
+		to = time.Time{}
+	} else {
+		to, err = time.Parse("2006-01-02T15:04:05.000Z", toStr)
+		if err != nil {
+			http.Error(w, "'to' paramter invalid", http.StatusBadRequest)
+			return
+		}
 	}
 
 	if from.After(to) {

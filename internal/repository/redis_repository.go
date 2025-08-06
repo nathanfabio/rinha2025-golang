@@ -51,11 +51,19 @@ func (r *RedisRepository) StorePayment(ctx context.Context, payment models.Payme
 }
 
 func (r *RedisRepository) GetPaymentRedis(ctx context.Context, from, to time.Time) ([]models.ProcessorType, error) {
-	fromScore := float64(from.Unix())
-	toScore := float64(to.Unix())
+	var min, max string
+	
+	if from.IsZero() {
+		min = "-inf"
+	} else {
+		min = fmt.Sprintf("%f", float64(from.Unix()))
+	}
 
-	min := fmt.Sprintf("%f", fromScore)
-	max := fmt.Sprintf("%f", toScore)
+	if to.IsZero() {
+		max = "+inf"
+	} else {
+		max = fmt.Sprintf("%f", float64(to.Unix()))
+	}
 
 	results, err := r.client.ZRangeByScore(ctx, "payments", &redis.ZRangeBy{
 		Min: min,
